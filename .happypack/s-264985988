@@ -1,0 +1,153 @@
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var core_1 = require("@angular/core");
+var ng2_alfresco_core_1 = require("ng2-alfresco-core");
+var AOSEditOnlineService = (function () {
+    function AOSEditOnlineService(alfrescoApiService, alfrescoAuthenticationService, alfrescoSettingsService, notificationService, logService) {
+        this.alfrescoApiService = alfrescoApiService;
+        this.alfrescoAuthenticationService = alfrescoAuthenticationService;
+        this.alfrescoSettingsService = alfrescoSettingsService;
+        this.notificationService = notificationService;
+        this.logService = logService;
+    }
+    AOSEditOnlineService.prototype.getUserAgent = function () {
+        return navigator.userAgent.toLowerCase();
+    };
+    AOSEditOnlineService.prototype.isWindows = function () {
+        return this.getUserAgent().indexOf('win') !== -1 ? true : false;
+    };
+    AOSEditOnlineService.prototype.isMacOs = function () {
+        return this.getUserAgent().indexOf('mac') !== -1 ? true : false;
+    };
+    AOSEditOnlineService.prototype.onActionEditOnlineAos = function (nodeId) {
+        var _this = this;
+        var opts = {
+            include: ['isLocked', 'path']
+        };
+        this.alfrescoApiService.getInstance().core.nodesApi.getNode(nodeId, opts)
+            .then(function (data) {
+            if (data) {
+                var node = data.entry;
+                if (node.isFile) {
+                    if (node.isLocked) {
+                        var checkedOut = node.aspectNames.contains('cm:checkedOut');
+                        var lockOwner = node.properties['cm:lockOwner'];
+                        var differentLockOwner = lockOwner.id !== _this.alfrescoAuthenticationService.getEcmUsername();
+                        if (checkedOut && differentLockOwner) {
+                            _this.onAlreadyLockedNotification(node.id, lockOwner);
+                        }
+                        else {
+                            _this.triggerEditOnlineAos(node);
+                        }
+                    }
+                    else {
+                        _this.triggerEditOnlineAos(node);
+                    }
+                }
+            }
+        }, function (error) {
+            console.log('Error' + error);
+        });
+    };
+    AOSEditOnlineService.prototype.onAlreadyLockedNotification = function (nodeId, lockOwner) {
+        this.notificationService.openSnackMessage('document ' + nodeId
+            + ' locked by ' + lockOwner, 3000);
+    };
+    AOSEditOnlineService.prototype.triggerEditOnlineAos = function (node) {
+        var url = this.onlineEditUrlAos(node);
+        var fileExtension = node.name.split('.').pop() !== null ? node.name.split('.').pop().toLowerCase() : '';
+        var protocolHandler = this.getProtocolForFileExtension(fileExtension);
+        if (protocolHandler === undefined) {
+            this.notificationService.openSnackMessage('No protocol handler available for file extension', 3000);
+            return;
+        }
+        if (!this.isWindows() && !this.isMacOs()) {
+            this.notificationService.openSnackMessage('Aos only supported on Windows and Mac', 3000);
+            return;
+        }
+        else {
+            this.aos_tryToLaunchOfficeByMsProtocolHandler(protocolHandler, url);
+        }
+        return;
+    };
+    AOSEditOnlineService.prototype.onlineEditUrlAos = function (node) {
+        var pathElements = node.path.elements.slice(1, node.path.elements.length);
+        var path = '/';
+        for (var _i = 0, pathElements_1 = pathElements; _i < pathElements_1.length; _i++) {
+            var element = pathElements_1[_i];
+            path = path + element.name + '/';
+        }
+        var url = this.alfrescoSettingsService.ecmHost + '/alfresco/aos' + path + '/' + node.name;
+        if (encodeURI(url).length > 256) {
+            url = this.alfrescoSettingsService.ecmHost + '/alfresco/aos/' + '_aos_nodeid' + '/' + node.id + '/' + node.name;
+        }
+        return url;
+    };
+    AOSEditOnlineService.prototype.getProtocolForFileExtension = function (fileExtension) {
+        var msProtocolNames = {
+            'doc': 'ms-word',
+            'docx': 'ms-word',
+            'docm': 'ms-word',
+            'dot': 'ms-word',
+            'dotx': 'ms-word',
+            'dotm': 'ms-word',
+            'xls': 'ms-excel',
+            'xlsx': 'ms-excel',
+            'xlsb': 'ms-excel',
+            'xlsm': 'ms-excel',
+            'xlt': 'ms-excel',
+            'xltx': 'ms-excel',
+            'xltm': 'ms-excel',
+            'ppt': 'ms-powerpoint',
+            'pptx': 'ms-powerpoint',
+            'pot': 'ms-powerpoint',
+            'potx': 'ms-powerpoint',
+            'potm': 'ms-powerpoint',
+            'pptm': 'ms-powerpoint',
+            'pps': 'ms-powerpoint',
+            'ppsx': 'ms-powerpoint',
+            'ppam': 'ms-powerpoint',
+            'ppsm': 'ms-powerpoint',
+            'sldx': 'ms-powerpoint',
+            'sldm': 'ms-powerpoint'
+        };
+        return msProtocolNames[fileExtension];
+    };
+    AOSEditOnlineService.prototype.aos_tryToLaunchOfficeByMsProtocolHandler = function (protocolHandler, url) {
+        var protocolUrl = protocolHandler + ':ofe%7Cu%7C' + url;
+        var protocolHandlerPresent = false;
+        var input = document.createElement('input');
+        var inputTop = document.body.scrollTop + 10;
+        input.setAttribute('style', 'z-index: 1000; background-color: rgba(0, 0, 0, 0); border: none; outline: none; position: absolute; left: 10px; top: ' + inputTop + 'px;');
+        document.getElementsByTagName('body')[0].appendChild(input);
+        input.focus();
+        input.onblur = function () {
+            protocolHandlerPresent = true;
+        };
+        location.href = protocolUrl;
+        var that = this;
+        setTimeout(function () {
+            input.onblur = null;
+            input.remove();
+            if (!protocolHandlerPresent) {
+                that.notificationService.openSnackMessage('unsupported version of Office', 3000);
+            }
+        }, 500);
+    };
+    return AOSEditOnlineService;
+}());
+AOSEditOnlineService = __decorate([
+    core_1.Injectable(),
+    __metadata("design:paramtypes", [typeof (_a = typeof ng2_alfresco_core_1.AlfrescoApiService !== "undefined" && ng2_alfresco_core_1.AlfrescoApiService) === "function" && _a || Object, typeof (_b = typeof ng2_alfresco_core_1.AlfrescoAuthenticationService !== "undefined" && ng2_alfresco_core_1.AlfrescoAuthenticationService) === "function" && _b || Object, typeof (_c = typeof ng2_alfresco_core_1.AlfrescoSettingsService !== "undefined" && ng2_alfresco_core_1.AlfrescoSettingsService) === "function" && _c || Object, typeof (_d = typeof ng2_alfresco_core_1.NotificationService !== "undefined" && ng2_alfresco_core_1.NotificationService) === "function" && _d || Object, typeof (_e = typeof ng2_alfresco_core_1.LogService !== "undefined" && ng2_alfresco_core_1.LogService) === "function" && _e || Object])
+], AOSEditOnlineService);
+exports.AOSEditOnlineService = AOSEditOnlineService;
+var _a, _b, _c, _d, _e;

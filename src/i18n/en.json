@@ -1,0 +1,12 @@
+{
+	"AOS": {
+		"ERROR": {
+			"NO_PROTOCOL_HANDLER": "No protocol handler available for file extension",
+			"UNSUPPORTED_CLIENT_OS": "AOS is only supported on Windows and Mac",
+            "UNSUPPORTED_CLIENT_VERSION": "Unsupported version of Office"
+		},
+        "ACTION": {
+            "TITLE": "Edit on Ms Office"
+        }
+	}
+}

@@ -1,0 +1,41 @@
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+function __export(m) {
+    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+}
+Object.defineProperty(exports, "__esModule", { value: true });
+var core_1 = require("@angular/core");
+var common_1 = require("@angular/common");
+var ng2_alfresco_aos_editonline_component_1 = require("./src/ng2-alfresco-aos-editonline.component");
+var aos_edit_online_service_1 = require("./src/services/aos-edit-online-service");
+__export(require("./src/ng2-alfresco-aos-editonline.component"));
+__export(require("./src/services/aos-edit-online-service"));
+var Ng2AlfrescoAosEditonlineModule = Ng2AlfrescoAosEditonlineModule_1 = (function () {
+    function Ng2AlfrescoAosEditonlineModule() {
+    }
+    Ng2AlfrescoAosEditonlineModule.forRoot = function (opts) {
+        if (opts === void 0) { opts = {}; }
+        return {
+            ngModule: Ng2AlfrescoAosEditonlineModule_1,
+            providers: [aos_edit_online_service_1.AOSEditOnlineService]
+        };
+    };
+    return Ng2AlfrescoAosEditonlineModule;
+}());
+Ng2AlfrescoAosEditonlineModule = Ng2AlfrescoAosEditonlineModule_1 = __decorate([
+    core_1.NgModule({
+        imports: [common_1.CommonModule],
+        declarations: [
+            ng2_alfresco_aos_editonline_component_1.Ng2AlfrescoAosEditonlineComponent
+        ],
+        providers: [aos_edit_online_service_1.AOSEditOnlineService],
+        exports: [ng2_alfresco_aos_editonline_component_1.Ng2AlfrescoAosEditonlineComponent]
+    })
+], Ng2AlfrescoAosEditonlineModule);
+exports.Ng2AlfrescoAosEditonlineModule = Ng2AlfrescoAosEditonlineModule;
+var Ng2AlfrescoAosEditonlineModule_1;
