@@ -1,7 +1,7 @@
 {
   "name": "ng2-alfresco-aos-editonline",
   "description": "Alfresco and AOS integration for ADF",
-  "version": "0.1.1",
+  "version": "0.1.0",
   "author": "Mikel Asla <mikel.asla@keensoft.es>",
   "scripts": {
     "clean": "rimraf dist node_modules typings bundles coverage .npmrc",
@@ -16,10 +16,10 @@
   "main": "bundles/ng2-alfresco-aos-editonline.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/keensoft/ng2-alfresco-aos.git/ng2-alfresco-aos-editonline.git"
+    "url": "https://github.com/keensoft/ng2-alfresco-aos-editonline"
   },
   "bugs": {
-    "url": "https://github.com/keensoft/ng2-alfresco-aos.git/ng2-alfresco-aos-editonline/issues"
+    "url": "https://github.com/keensoft/ng2-alfresco-aos-editonline/issues"
   },
   "dependencies": {
     "@angular/animations": "4.2.5",
