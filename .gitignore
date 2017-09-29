@@ -17,4 +17,5 @@ index.js.map
 *.tgz
 /package/
 /bundles/
+/happypack/
 index.d.ts

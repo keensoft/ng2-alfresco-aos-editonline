@@ -11,9 +11,7 @@ function __export(m) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var core_1 = require("@angular/core");
 var common_1 = require("@angular/common");
-var ng2_alfresco_aos_editonline_component_1 = require("./src/ng2-alfresco-aos-editonline.component");
 var aos_edit_online_service_1 = require("./src/services/aos-edit-online-service");
-__export(require("./src/ng2-alfresco-aos-editonline.component"));
 __export(require("./src/services/aos-edit-online-service"));
 var Ng2AlfrescoAosEditonlineModule = Ng2AlfrescoAosEditonlineModule_1 = (function () {
     function Ng2AlfrescoAosEditonlineModule() {
@@ -30,11 +28,9 @@ var Ng2AlfrescoAosEditonlineModule = Ng2AlfrescoAosEditonlineModule_1 = (functio
 Ng2AlfrescoAosEditonlineModule = Ng2AlfrescoAosEditonlineModule_1 = __decorate([
     core_1.NgModule({
         imports: [common_1.CommonModule],
-        declarations: [
-            ng2_alfresco_aos_editonline_component_1.Ng2AlfrescoAosEditonlineComponent
-        ],
+        declarations: [],
         providers: [aos_edit_online_service_1.AOSEditOnlineService],
-        exports: [ng2_alfresco_aos_editonline_component_1.Ng2AlfrescoAosEditonlineComponent]
+        exports: []
     })
 ], Ng2AlfrescoAosEditonlineModule);
 exports.Ng2AlfrescoAosEditonlineModule = Ng2AlfrescoAosEditonlineModule;

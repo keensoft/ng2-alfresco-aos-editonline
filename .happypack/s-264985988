@@ -10,30 +10,24 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var core_1 = require("@angular/core");
+var Observable_1 = require("rxjs/Observable");
 var ng2_alfresco_core_1 = require("ng2-alfresco-core");
-var AOSEditOnlineService = (function () {
-    function AOSEditOnlineService(alfrescoApiService, alfrescoAuthenticationService, alfrescoSettingsService, notificationService, logService) {
+var ng2_alfresco_documentlist_1 = require("ng2-alfresco-documentlist");
+var AOSEditOnlineService = AOSEditOnlineService_1 = (function () {
+    function AOSEditOnlineService(alfrescoApiService, alfrescoAuthenticationService, alfrescoSettingsService, notificationService, documentActionService, translationService) {
         this.alfrescoApiService = alfrescoApiService;
         this.alfrescoAuthenticationService = alfrescoAuthenticationService;
         this.alfrescoSettingsService = alfrescoSettingsService;
         this.notificationService = notificationService;
-        this.logService = logService;
+        this.documentActionService = documentActionService;
+        this.translationService = translationService;
     }
-    AOSEditOnlineService.prototype.getUserAgent = function () {
-        return navigator.userAgent.toLowerCase();
-    };
-    AOSEditOnlineService.prototype.isWindows = function () {
-        return this.getUserAgent().indexOf('win') !== -1 ? true : false;
-    };
-    AOSEditOnlineService.prototype.isMacOs = function () {
-        return this.getUserAgent().indexOf('mac') !== -1 ? true : false;
-    };
     AOSEditOnlineService.prototype.onActionEditOnlineAos = function (nodeId) {
         var _this = this;
         var opts = {
             include: ['isLocked', 'path']
         };
-        this.alfrescoApiService.getInstance().core.nodesApi.getNode(nodeId, opts)
+        return Observable_1.Observable.fromPromise(this.alfrescoApiService.getInstance().core.nodesApi.getNode(nodeId, opts)
             .then(function (data) {
             if (data) {
                 var node = data.entry;
@@ -44,40 +38,52 @@ var AOSEditOnlineService = (function () {
                         var differentLockOwner = lockOwner.id !== _this.alfrescoAuthenticationService.getEcmUsername();
                         if (checkedOut && differentLockOwner) {
                             _this.onAlreadyLockedNotification(node.id, lockOwner);
+                            return false;
                         }
                         else {
                             _this.triggerEditOnlineAos(node);
+                            return true;
                         }
                     }
                     else {
                         _this.triggerEditOnlineAos(node);
+                        return true;
                     }
                 }
             }
-        }, function (error) {
-            console.log('Error' + error);
-        });
+        }));
+    };
+    AOSEditOnlineService.prototype.getUserAgent = function () {
+        return navigator.userAgent.toLowerCase();
+    };
+    AOSEditOnlineService.prototype.isWindows = function () {
+        return this.getUserAgent().indexOf('win') !== -1 ? true : false;
+    };
+    AOSEditOnlineService.prototype.isMacOs = function () {
+        return this.getUserAgent().indexOf('mac') !== -1 ? true : false;
     };
     AOSEditOnlineService.prototype.onAlreadyLockedNotification = function (nodeId, lockOwner) {
-        this.notificationService.openSnackMessage('document ' + nodeId
-            + ' locked by ' + lockOwner, 3000);
+        this.notificationService.openSnackMessage("Document {nodeId} locked by {lockOwner}", 3000);
+    };
+    AOSEditOnlineService.prototype.getProtocolForFileExtension = function (fileExtension) {
+        return AOSEditOnlineService_1.MS_PROTOCOL_NAMES[fileExtension];
     };
     AOSEditOnlineService.prototype.triggerEditOnlineAos = function (node) {
         var url = this.onlineEditUrlAos(node);
         var fileExtension = node.name.split('.').pop() !== null ? node.name.split('.').pop().toLowerCase() : '';
         var protocolHandler = this.getProtocolForFileExtension(fileExtension);
         if (protocolHandler === undefined) {
-            this.notificationService.openSnackMessage('No protocol handler available for file extension', 3000);
+            var message = this.translationService.get('AOS.ERROR.NO_PROTOCOL_HANDLER');
+            this.notificationService.openSnackMessage(message.value, 3000);
             return;
         }
         if (!this.isWindows() && !this.isMacOs()) {
-            this.notificationService.openSnackMessage('Aos only supported on Windows and Mac', 3000);
-            return;
+            var message = this.translationService.get('AOS.ERROR.UNSUPPORTED_CLIENT_OS');
+            this.notificationService.openSnackMessage(message.value, 3000);
         }
         else {
             this.aos_tryToLaunchOfficeByMsProtocolHandler(protocolHandler, url);
         }
-        return;
     };
     AOSEditOnlineService.prototype.onlineEditUrlAos = function (node) {
         var pathElements = node.path.elements.slice(1, node.path.elements.length);
@@ -91,36 +97,6 @@ var AOSEditOnlineService = (function () {
             url = this.alfrescoSettingsService.ecmHost + '/alfresco/aos/' + '_aos_nodeid' + '/' + node.id + '/' + node.name;
         }
         return url;
-    };
-    AOSEditOnlineService.prototype.getProtocolForFileExtension = function (fileExtension) {
-        var msProtocolNames = {
-            'doc': 'ms-word',
-            'docx': 'ms-word',
-            'docm': 'ms-word',
-            'dot': 'ms-word',
-            'dotx': 'ms-word',
-            'dotm': 'ms-word',
-            'xls': 'ms-excel',
-            'xlsx': 'ms-excel',
-            'xlsb': 'ms-excel',
-            'xlsm': 'ms-excel',
-            'xlt': 'ms-excel',
-            'xltx': 'ms-excel',
-            'xltm': 'ms-excel',
-            'ppt': 'ms-powerpoint',
-            'pptx': 'ms-powerpoint',
-            'pot': 'ms-powerpoint',
-            'potx': 'ms-powerpoint',
-            'potm': 'ms-powerpoint',
-            'pptm': 'ms-powerpoint',
-            'pps': 'ms-powerpoint',
-            'ppsx': 'ms-powerpoint',
-            'ppam': 'ms-powerpoint',
-            'ppsm': 'ms-powerpoint',
-            'sldx': 'ms-powerpoint',
-            'sldm': 'ms-powerpoint'
-        };
-        return msProtocolNames[fileExtension];
     };
     AOSEditOnlineService.prototype.aos_tryToLaunchOfficeByMsProtocolHandler = function (protocolHandler, url) {
         var protocolUrl = protocolHandler + ':ofe%7Cu%7C' + url;
@@ -139,15 +115,44 @@ var AOSEditOnlineService = (function () {
             input.onblur = null;
             input.remove();
             if (!protocolHandlerPresent) {
-                that.notificationService.openSnackMessage('unsupported version of Office', 3000);
+                var message = that.translationService.get('AOS.ERROR.UNSUPPORTED_CLIENT_VERSION');
+                that.notificationService.openSnackMessage(message.value, 3000);
             }
         }, 500);
     };
     return AOSEditOnlineService;
 }());
-AOSEditOnlineService = __decorate([
+AOSEditOnlineService.AOS_EDITONLINE_ACTION_HANDLER_KEY = 'aos-editonline';
+AOSEditOnlineService.MS_PROTOCOL_NAMES = {
+    'doc': 'ms-word',
+    'docx': 'ms-word',
+    'docm': 'ms-word',
+    'dot': 'ms-word',
+    'dotx': 'ms-word',
+    'dotm': 'ms-word',
+    'xls': 'ms-excel',
+    'xlsx': 'ms-excel',
+    'xlsb': 'ms-excel',
+    'xlsm': 'ms-excel',
+    'xlt': 'ms-excel',
+    'xltx': 'ms-excel',
+    'xltm': 'ms-excel',
+    'ppt': 'ms-powerpoint',
+    'pptx': 'ms-powerpoint',
+    'pot': 'ms-powerpoint',
+    'potx': 'ms-powerpoint',
+    'potm': 'ms-powerpoint',
+    'pptm': 'ms-powerpoint',
+    'pps': 'ms-powerpoint',
+    'ppsx': 'ms-powerpoint',
+    'ppam': 'ms-powerpoint',
+    'ppsm': 'ms-powerpoint',
+    'sldx': 'ms-powerpoint',
+    'sldm': 'ms-powerpoint'
+};
+AOSEditOnlineService = AOSEditOnlineService_1 = __decorate([
     core_1.Injectable(),
-    __metadata("design:paramtypes", [typeof (_a = typeof ng2_alfresco_core_1.AlfrescoApiService !== "undefined" && ng2_alfresco_core_1.AlfrescoApiService) === "function" && _a || Object, typeof (_b = typeof ng2_alfresco_core_1.AlfrescoAuthenticationService !== "undefined" && ng2_alfresco_core_1.AlfrescoAuthenticationService) === "function" && _b || Object, typeof (_c = typeof ng2_alfresco_core_1.AlfrescoSettingsService !== "undefined" && ng2_alfresco_core_1.AlfrescoSettingsService) === "function" && _c || Object, typeof (_d = typeof ng2_alfresco_core_1.NotificationService !== "undefined" && ng2_alfresco_core_1.NotificationService) === "function" && _d || Object, typeof (_e = typeof ng2_alfresco_core_1.LogService !== "undefined" && ng2_alfresco_core_1.LogService) === "function" && _e || Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof ng2_alfresco_core_1.AlfrescoApiService !== "undefined" && ng2_alfresco_core_1.AlfrescoApiService) === "function" && _a || Object, typeof (_b = typeof ng2_alfresco_core_1.AlfrescoAuthenticationService !== "undefined" && ng2_alfresco_core_1.AlfrescoAuthenticationService) === "function" && _b || Object, typeof (_c = typeof ng2_alfresco_core_1.AlfrescoSettingsService !== "undefined" && ng2_alfresco_core_1.AlfrescoSettingsService) === "function" && _c || Object, typeof (_d = typeof ng2_alfresco_core_1.NotificationService !== "undefined" && ng2_alfresco_core_1.NotificationService) === "function" && _d || Object, typeof (_e = typeof ng2_alfresco_documentlist_1.DocumentActionsService !== "undefined" && ng2_alfresco_documentlist_1.DocumentActionsService) === "function" && _e || Object, typeof (_f = typeof ng2_alfresco_core_1.AlfrescoTranslationService !== "undefined" && ng2_alfresco_core_1.AlfrescoTranslationService) === "function" && _f || Object])
 ], AOSEditOnlineService);
 exports.AOSEditOnlineService = AOSEditOnlineService;
-var _a, _b, _c, _d, _e;
+var AOSEditOnlineService_1, _a, _b, _c, _d, _e, _f;

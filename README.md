@@ -64,7 +64,7 @@ Make sure you can access both services from the Office client.
 Install the **ng2-alfresco-aos-editonline** module into your ADF application
 
 ```sh
-npm install ng2-alfresco-aos-editonline --save
+npm install ng2-alfresco-aos-editonline@0.1.1 --save
 ```
 
 ## Basic usage
@@ -75,7 +75,7 @@ npm install ng2-alfresco-aos-editonline --save
 $ yo ng2-alfresco-app
 $ cd example-app
 $ npm install
-$ npm install ng2-alfresco-aos-editonline --save
+$ npm install ng2-alfresco-aos-editonline@0.1.1 --save
 ```
 
 **NOTE:** make sure your generator is up to date before creating new projects (tested with 1.8.0)
@@ -184,9 +184,9 @@ npm run build
 
 ## History
 
-For detailed changelog, check [Releases](https://github.com/git+https://github.com/keensoft/ng2-alfresco-aos.git/ng2-alfresco-aos-editonline/releases).
+For detailed changelog, check [Releases](https://github.com/keensoft/ng2-alfresco-aos-editonline/releases).
 
 ## Contributors
 
-[Contributors](https://github.com/git+https://github.com/keensoft/ng2-alfresco-aos.git/ng2-alfresco-aos-editonline/graphs/contributors)
+[Contributors](https://github.com/keensoft/ng2-alfresco-aos-editonline/graphs/contributors)
   
