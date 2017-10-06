@@ -1,7 +1,7 @@
 {
   "name": "ng2-alfresco-aos-editonline",
   "description": "Alfresco and AOS integration for ADF",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "author": "Mikel Asla <mikel.asla@keensoft.es>",
   "scripts": {
     "clean": "rimraf dist node_modules typings bundles coverage .npmrc",
