@@ -5,16 +5,17 @@ import {
   AlfrescoApiService,
   AlfrescoAuthenticationService,
   NotificationService,
-  AlfrescoSettingsService,
+  AppConfigService,
   AlfrescoContentService,
   AlfrescoTranslationService
 } from 'ng2-alfresco-core';
-import { DocumentActionsService, NodeActionsService, DocumentListService, ContentActionHandler, ContentActionModel, PermissionModel } from 'ng2-alfresco-documentlist';
+import { DocumentActionsService } from 'ng2-alfresco-documentlist';
 import { MinimalNodeEntity } from 'alfresco-js-api';
 
 @Injectable()
 export class AOSEditOnlineService {
 
+  static ECM_HOST_CONFIG_KEY = 'ecmHost';
   static AOS_EDITONLINE_ACTION_HANDLER_KEY: string = 'aos-editonline';
   static MS_PROTOCOL_NAMES: any = {
     'doc': 'ms-word',
@@ -47,12 +48,14 @@ export class AOSEditOnlineService {
   constructor(
     private alfrescoApiService: AlfrescoApiService,
     private alfrescoAuthenticationService: AlfrescoAuthenticationService,
-    private alfrescoSettingsService: AlfrescoSettingsService,
+    private appConfigService: AppConfigService,
     private notificationService: NotificationService,
     private documentActionService: DocumentActionsService,
     private translationService: AlfrescoTranslationService
   ) {
-
+    documentActionService.setHandler(
+      'aos-edit-online',
+      this.onActionEditOnlineAos.bind(this));
   }
 
   onActionEditOnlineAos(nodeId: string): Observable<boolean> {
@@ -136,9 +139,10 @@ export class AOSEditOnlineService {
       path = path + element.name + '/';
     }
 
-    let url = this.alfrescoSettingsService.ecmHost + '/alfresco/aos' + path + '/' + node.name;
+    let ecmHost = this.appConfigService.get<string>(AOSEditOnlineService.ECM_HOST_CONFIG_KEY);
+    let url = ecmHost + '/alfresco/aos' + path + '/' + node.name;
     if (encodeURI(url).length > 256) {
-      url = this.alfrescoSettingsService.ecmHost + '/alfresco/aos/' + '_aos_nodeid' + '/' + node.id + '/' + node.name;
+      url = ecmHost + '/alfresco/aos/' + '_aos_nodeid' + '/' + node.id + '/' + node.name;
     }
     return url;
   }

@@ -69,6 +69,14 @@ Install the **ng2-alfresco-aos-editonline** module into your ADF application
 npm install ng2-alfresco-aos-editonline --save
 ```
 
+
+## Compatibility Matrix
+
+| package version | ADF version |
+| --- | --- |
+| 0.1.5 | 1.8.0 |
+| 0.1.6 | 1.9.0 |
+
 ## Basic usage
 
 1. Generate a example ADF application and install the module
@@ -79,8 +87,6 @@ $ cd example-app
 $ npm install
 $ npm install ng2-alfresco-aos-editonline --save
 ```
-
-**NOTE:** make sure your generator is up to date before creating new projects (tested with 1.8.0)
 
 1. Add the module to your application
 

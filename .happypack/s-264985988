@@ -21,6 +21,7 @@ var AOSEditOnlineService = AOSEditOnlineService_1 = (function () {
         this.notificationService = notificationService;
         this.documentActionService = documentActionService;
         this.translationService = translationService;
+        documentActionService.setHandler('aos-edit-online', this.onActionEditOnlineAos.bind(this));
     }
     AOSEditOnlineService.prototype.onActionEditOnlineAos = function (nodeId) {
         var _this = this;
